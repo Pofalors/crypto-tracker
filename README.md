@@ -20,7 +20,7 @@ A full-stack web application for tracking cryptocurrency prices in real-time wit
 - **🔄 Auto-Refresh**: Automatic updates every 30 seconds
 
 ## 🏗️ Architecture
-
+```
 crypto-tracker/
 ├── app.py # Flask application
 ├── database.py # Database operations
@@ -33,7 +33,7 @@ crypto-tracker/
 └── templates/
 ├── index.html # Dashboard template
 └── home.html # Landing page template
-
+```
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -81,12 +81,14 @@ python app.py
 - API Health: http://localhost:5000/api/health
 
 ## 📡 API Endpoints
-
-Method	            Endpoint	                    Description
-GET	            /api/prices	                Get latest cryptocurrency prices
-GET	            /api/history/{coin_name}	Get historical data for specific coin
-GET	            /api/health	                Check API health status
-GET	            /dashboard	                Interactive dashboard
+```markdown
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/prices` | Get latest cryptocurrency prices |
+| GET | `/api/history/{coin_name}` | Get historical data for specific coin |
+| GET | `/api/health` | Check API health status |
+| GET | `/dashboard` | Interactive dashboard |
+```
 
 ## Technologies Used
 
