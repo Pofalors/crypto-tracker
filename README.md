@@ -106,11 +106,11 @@ python app.py
 
 ## 🤝 Contributing
 
--Fork the project
--Create your feature branch (git checkout -b feature/AmazingFeature)
--Commit your changes (git commit -m 'Add some AmazingFeature')
--Push to the branch (git push origin feature/AmazingFeature)
--Open a Pull Request
+- Fork the project
+- Create your feature branch (git checkout -b feature/AmazingFeature)
+- Commit your changes (git commit -m 'Add some AmazingFeature')
+- Push to the branch (git push origin feature/AmazingFeature)
+- Open a Pull Request
 
 ## 📝 License
 
