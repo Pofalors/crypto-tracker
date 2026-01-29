@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Crypto Tracker API</title>
+    <link rel="icon" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- ή αν θες custom -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero-section {
+            padding: 5rem 0;
+            color: white;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00c853 0%, #00b248 100%);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 200, 83, 0.3);
+        }
+        .tech-badge {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+        .endpoint-card {
+            background: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-graph-up"></i> Crypto Tracker
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Real-Time Cryptocurrency Tracker
+                    </h1>
+                    <p class="lead mb-4">
+                        A full-stack web application that tracks cryptocurrency prices in real-time.
+                        Built with Python Flask, Chart.js, and SQLite.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/dashboard" class="btn btn-primary btn-lg">
+                            <i class="bi bi-speedometer2"></i> Go to Dashboard
+                        </a>
+                        <a href="https://github.com/Pofalors" class="btn btn-outline-light btn-lg" target="_blank">
+                            <i class="bi bi-github"></i> GitHub Profile
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0">
+                    <div class="card feature-card">
+                        <h3 class="mb-3">🚀 Project Features</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Real-time price updates</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Interactive charts & graphs</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> RESTful API endpoints</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> SQLite database</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Auto-refresh every 30 seconds</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Responsive design</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technologies Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center text-white mb-5">🛠️ Technologies Used</h2>
+            <div class="row text-center">
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">Python</span>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">Flask</span>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">SQLite</span>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">Chart.js</span>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">Bootstrap 5</span>
+                </div>
+                <div class="col-md-2 col-4 mb-3">
+                    <span class="tech-badge">REST API</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Documentation -->
+    <section class="py-5 bg-white" style="border-radius: 30px 30px 0 0;">
+        <div class="container">
+            <h2 class="text-center mb-5">📚 API Documentation</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="endpoint-card">
+                        <code class="text-primary">GET /api/prices</code>
+                        <p class="mb-0 mt-2">Get latest cryptocurrency prices</p>
+                    </div>
+                    <div class="endpoint-card">
+                        <code class="text-primary">GET /api/history/{coin_name}</code>
+                        <p class="mb-0 mt-2">Get historical data for specific coin</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="endpoint-card">
+                        <code class="text-primary">GET /api/health</code>
+                        <p class="mb-0 mt-2">Check API health status</p>
+                    </div>
+                    <div class="endpoint-card">
+                        <code class="text-primary">GET /dashboard</code>
+                        <p class="mb-0 mt-2">Interactive dashboard</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test API Button -->
+            <div class="text-center mt-5">
+                <button class="btn btn-outline-primary" onclick="testAPI()">
+                    <i class="bi bi-lightning"></i> Test API Endpoints
+                </button>
+                <div id="api-test-result" class="mt-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white text-center">
+        <div class="container">
+            <p class="mb-0">
+                <i class="bi bi-code-slash"></i> Built by Your Name • 
+                <a href="https://github.com/Pofalors/crypto-tracker" class="text-white" target="_blank">
+                    <i class="bi bi-github"></i> View on GitHub
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        function testAPI() {
+            const resultDiv = document.getElementById('api-test-result');
+            resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Testing API...';
+            
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> API is healthy!<br>
+                            Status: ${data.status}<br>
+                            Timestamp: ${new Date(data.timestamp).toLocaleTimeString()}
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> API test failed: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+        
+        // Auto-test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            testAPI();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

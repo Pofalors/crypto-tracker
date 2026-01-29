@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Crypto Tracker Dashboard</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .crypto-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .crypto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .selected-coin {
+            border: 3px solid #0d6efd !important;
+        }
+        .price-up {
+            color: #00c853;
+        }
+        .price-down {
+            color: #ff4444;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="display-4">🚀 Crypto Tracker Dashboard</h1>
+                    <p class="lead">Real-time cryptocurrency prices & analytics</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Current Prices Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>📊 Current Prices</h2>
+                    <div class="text-muted" id="last-update">Last update: -</div>
+                </div>
+                <div class="row g-3" id="prices-container">
+                    <!-- Prices will load here -->
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading cryptocurrency data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="card crypto-card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3" id="chart-title">Bitcoin - Price History</h3>
+                        <div class="chart-container">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card crypto-card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">📋 Coin Information</h3>
+                        <div id="coin-info" class="mb-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Select a coin card above to view detailed information
+                            </div>
+                        </div>
+                        <hr>
+                        <h5>📊 Quick Stats</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Tracked Coins</span>
+                                <span class="badge bg-primary rounded-pill" id="tracking-count">5</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Update Interval</span>
+                                <span class="text-success">30 seconds</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Data Points</span>
+                                <span class="badge bg-info rounded-pill" id="data-points">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>API Status</span>
+                                <span class="badge bg-success rounded-pill" id="api-status">Online</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="text-muted small">
+                    <p>🔄 Auto-refreshes every 30 seconds | 
+                       <span id="current-time">Current time: -</span> | 
+                       Built with Flask, Chart.js & Bootstrap</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Our JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+    <!-- Initialize on load -->
+    <script>
+        console.log('🔄 Initializing dashboard...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM fully loaded');
+            if (typeof initChart === 'function') {
+                initChart();
+            } else {
+                console.error('❌ initChart function not found!');
+            }
+            if (typeof startAutoRefresh === 'function') {
+                startAutoRefresh();
+            }
+            
+            // Update current time
+            function updateCurrentTime() {
+                const now = new Date();
+                document.getElementById('current-time').textContent = 
+                    `Current time: ${now.toLocaleTimeString()}`;
+            }
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+        });
+    </script>
+</body>
+</html>
