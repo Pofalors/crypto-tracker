@@ -4,6 +4,7 @@
 ![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Dashboard Screenshot](screenshot.png)
 
 A full-stack web application for tracking cryptocurrency prices in real-time with interactive charts and analytics.
 
