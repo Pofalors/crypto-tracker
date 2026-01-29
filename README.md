@@ -81,14 +81,14 @@ python app.py
 - API Health: http://localhost:5000/api/health
 
 ## 📡 API Endpoints
-```markdown
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/prices` | Get latest cryptocurrency prices |
 | GET | `/api/history/{coin_name}` | Get historical data for specific coin |
 | GET | `/api/health` | Check API health status |
 | GET | `/dashboard` | Interactive dashboard |
-```
+
 
 ## Technologies Used
 
