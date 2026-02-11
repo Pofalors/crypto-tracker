@@ -80,13 +80,15 @@ python app.py
 - Dashboard: http://localhost:5000/dashboard
 - API Health: http://localhost:5000/api/health
 
+```markdown
 ## 📡 API Endpoints
 
-Method	            Endpoint	                    Description
-GET	            /api/prices	                Get latest cryptocurrency prices
-GET	            /api/history/{coin_name}	Get historical data for specific coin
-GET	            /api/health	                Check API health status
-GET	            /dashboard	                Interactive dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/prices` | Get latest cryptocurrency prices |
+| GET | `/api/history/{coin_name}` | Get historical data for specific coin |
+| GET | `/api/health` | Check API health status |
+| GET | `/dashboard` | Interactive dashboard |
 
 ## Technologies Used
 

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: crypto-tracker
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./crypto_prices.db:/app/crypto_prices.db
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
