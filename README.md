@@ -79,6 +79,32 @@ python app.py
 - Dashboard: http://localhost:5000/dashboard
 - API Health: http://localhost:5000/api/health
 
+## 🐳 Docker Setup
+``
+### Prerequisites
+- Docker Desktop installed
+
+```bash
+# Clone the repository
+git clone https://github.com/Pofalors/crypto-tracker.git
+cd crypto-tracker
+
+# Build the image
+docker build -t crypto-tracker .
+
+# Run the container
+docker run -d -p 5000:5000 --name crypto-tracker crypto-tracker
+
+# Docker Compose
+docker-compose up -d
+
+#Stop the container
+docker stop crypto-tracker
+docker rm crypto-tracker
+```
+- Dashboard: http://localhost:5000/dashboard
+
+
 ```markdown
 ## 📡 API Endpoints
 
