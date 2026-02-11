@@ -7,8 +7,7 @@
 
 A full-stack web application for tracking cryptocurrency prices in real-time with interactive charts and analytics.
 
-![Dashboard Screenshot](https://via.placeholder.com/800x450/667eea/ffffff?text=Crypto+Tracker+Dashboard)
-*Screenshot placeholder - add your own screenshot*
+![Dashboard Screenshot](screenshot.png)
 
 ## ✨ Features
 
@@ -20,7 +19,7 @@ A full-stack web application for tracking cryptocurrency prices in real-time wit
 - **🔄 Auto-Refresh**: Automatic updates every 30 seconds
 
 ## 🏗️ Architecture
-
+```
 crypto-tracker/
 ├── app.py # Flask application
 ├── database.py # Database operations
@@ -33,7 +32,7 @@ crypto-tracker/
 └── templates/
 ├── index.html # Dashboard template
 └── home.html # Landing page template
-
+```
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -107,11 +106,11 @@ python app.py
 
 ## 🤝 Contributing
 
--Fork the project
--Create your feature branch (git checkout -b feature/AmazingFeature)
--Commit your changes (git commit -m 'Add some AmazingFeature')
--Push to the branch (git push origin feature/AmazingFeature)
--Open a Pull Request
+- Fork the project
+- Create your feature branch (git checkout -b feature/AmazingFeature)
+- Commit your changes (git commit -m 'Add some AmazingFeature')
+- Push to the branch (git push origin feature/AmazingFeature)
+- Open a Pull Request
 
 ## 📝 License
 
