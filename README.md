@@ -80,7 +80,7 @@ python app.py
 - API Health: http://localhost:5000/api/health
 
 ## 🐳 Docker Setup
-``
+
 ### Prerequisites
 - Docker Desktop installed
 
