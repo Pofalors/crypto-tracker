@@ -105,9 +105,8 @@ docker rm crypto-tracker
 - Dashboard: http://localhost:5000/dashboard
 
 
-```markdown
 ## 📡 API Endpoints
-
+```markdown
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/prices` | Get latest cryptocurrency prices |
