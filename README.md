@@ -84,6 +84,8 @@ python app.py
 ### Prerequisites
 - Docker Desktop installed
 
+### Run with Docker
+
 ```bash
 # Clone the repository
 git clone https://github.com/Pofalors/crypto-tracker.git
