@@ -103,16 +103,108 @@
                 width: 10%;  /* 10 coins per row σε μεγάλες οθόνες */
             }
         }
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .card {
+            background-color: #2d2d2d;
+            border-color: #404040;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .crypto-card {
+            background-color: #333333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .dark-mode .crypto-card:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .dark-mode .table {
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .dark-mode .table-hover > tbody > tr:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .table-primary {
+            background-color: #1e3a5f !important;
+            color: white !important;
+        }
+
+        .dark-mode .sticky-top.bg-light {
+            background-color: #404040 !important;
+            color: white;
+        }
+
+        .dark-mode .list-group-item {
+            background-color: #2d2d2d;
+            border-color: #404040;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .bg-light {
+            background-color: #404040 !important;
+        }
+
+        .dark-mode .text-muted {
+            color: #b0b0b0 !important;
+        }
+
+        .dark-mode .alert-primary {
+            background-color: #1e3a5f;
+            border-color: #2d4a7a;
+            color: white;
+        }
+
+        .dark-mode .alert-info {
+            background-color: #1a3a4a;
+            border-color: #2a4a5a;
+            color: white;
+        }
+
+        .dark-mode .btn-outline-primary {
+            border-color: #4dabf7;
+            color: #4dabf7;
+        }
+
+        .dark-mode .btn-outline-primary:hover {
+            background-color: #4dabf7;
+            color: #1a1a1a;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2a3a4a 100%);
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <div class="header">
         <div class="container">
-            <div class="row">
-                <div class="col-12">
+            <div class="row align-items-center">
+                <div class="col-10">
                     <h1 class="display-4">🚀 Crypto Tracker Dashboard</h1>
                     <p class="lead">Real-time cryptocurrency prices & analytics</p>
+                </div>
+                <div class="col-2 text-end">
+                    <button class="btn btn-light" id="darkModeToggle" onclick="toggleDarkMode()">
+                        <span id="themeIcon">🌙</span> <span id="themeText">Dark</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -134,8 +226,7 @@
                         </div>
                         <p class="mt-2">Loading cryptocurrency data...</p>
                     </div>
-                </div>
-                <div id="table-view" class="mt-3"></div>
+                </div>                
             </div>
         </div>
 
@@ -184,6 +275,7 @@
                 </div>
             </div>
         </div>
+        <div id="table-view" class="mt-3"></div>
 
         <!-- Alerts Section -->
         <div class="row mt-4">

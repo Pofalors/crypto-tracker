@@ -112,6 +112,46 @@ async function fetchPrices() {
     }
 }
 
+// Dark Mode Toggle
+function toggleDarkMode() {
+    const body = document.body;
+    const button = document.getElementById('darkModeToggle');
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    
+    body.classList.toggle('dark-mode');
+    
+    if (body.classList.contains('dark-mode')) {
+        // Dark mode enabled
+        icon.textContent = '☀️';
+        text.textContent = 'Light';
+        localStorage.setItem('darkMode', 'enabled');
+    } else {
+        // Light mode enabled
+        icon.textContent = '🌙';
+        text.textContent = 'Dark';
+        localStorage.setItem('darkMode', 'disabled');
+    }
+}
+
+// Load dark mode preference on page load
+function loadDarkModePreference() {
+    const darkMode = localStorage.getItem('darkMode');
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    
+    if (darkMode === 'enabled') {
+        body.classList.add('dark-mode');
+        icon.textContent = '☀️';
+        text.textContent = 'Light';
+    } else {
+        body.classList.remove('dark-mode');
+        icon.textContent = '🌙';
+        text.textContent = 'Dark';
+    }
+}
+
 // Display prices in hybrid mode (5 cards + table)
 function displayPrices(prices) {
     console.log('📊 Displaying hybrid view with', prices.length, 'coins');
@@ -324,6 +364,23 @@ function updateChart(prices, timestamps, coinName) {
     priceChart.data.datasets[0].borderColor = isUp ? '#00c853' : '#ff4444';
     priceChart.data.datasets[0].backgroundColor = isUp ? 
         'rgba(0, 200, 83, 0.1)' : 'rgba(255, 68, 68, 0.1)';
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Προσαρμογή χρωμάτων για dark mode
+    if (isDarkMode) {
+        priceChart.options.scales.x.grid.color = 'rgba(255,255,255,0.1)';
+        priceChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+        priceChart.options.scales.x.ticks.color = '#e0e0e0';
+        priceChart.options.scales.y.ticks.color = '#e0e0e0';
+        priceChart.options.plugins.legend.labels.color = '#e0e0e0';
+    } else {
+        priceChart.options.scales.x.grid.color = 'rgba(0,0,0,0.05)';
+        priceChart.options.scales.y.grid.color = 'rgba(0,0,0,0.05)';
+        priceChart.options.scales.x.ticks.color = '#666';
+        priceChart.options.scales.y.ticks.color = '#666';
+        priceChart.options.plugins.legend.labels.color = '#666';
+    }
     
     // Update chart
     priceChart.update();
@@ -635,6 +692,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load active alerts
     loadActiveAlerts();
+    // Load dark mode preference when page loads
+    loadDarkModePreference();
     
     // Update current time
     function updateCurrentTime() {
