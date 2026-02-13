@@ -5,6 +5,7 @@ from datetime import datetime
 from alerts import AlertSystem
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+import sqlite3
 
 app = Flask(__name__)
 
@@ -101,6 +102,37 @@ def get_alerts():
         "status": "success",
         "alerts": result
     })
+    
+@app.route('/api/alerts/<int:alert_id>', methods=['DELETE'])
+def delete_alert(alert_id):
+    """Διαγράφει ένα alert"""
+    try:
+        conn = sqlite3.connect('crypto_prices.db')
+        c = conn.cursor()
+        
+        # Έλεγχος αν υπάρχει το alert
+        c.execute('SELECT id FROM alerts WHERE id = ?', (alert_id,))
+        if not c.fetchone():
+            return jsonify({
+                "status": "error",
+                "message": "Alert not found"
+            }), 404
+        
+        # Διαγραφή
+        c.execute('DELETE FROM alerts WHERE id = ?', (alert_id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Alert {alert_id} deleted successfully"
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 # Endpoint για health check
 @app.route('/api/health')

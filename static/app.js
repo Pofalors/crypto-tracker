@@ -313,11 +313,6 @@ function startAutoRefresh() {
     setInterval(fetchPrices, 30000); // Refresh every 30 seconds
 }
 
-// Make functions available globally
-window.selectCoin = selectCoin;
-window.initChart = initChart;
-window.startAutoRefresh = startAutoRefresh;
-
 // Alert form submission
 document.getElementById('alert-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -408,11 +403,44 @@ async function loadActiveAlerts() {
     }
 }
 
-// Delete alert
+// Global variable για το alert που θα διαγραφεί
+let alertToDelete = null;
+
+// Delete alert με modal
 async function deleteAlert(alertId) {
-    // Θα το υλοποιήσουμε μετά
-    console.log('Delete alert:', alertId);
+    alertToDelete = alertId;
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
 }
+
+// Επιβεβαίωση διαγραφής
+document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+    if (!alertToDelete) return;
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+    modal.hide();
+    
+    try {
+        const response = await fetch(`/api/alerts/${alertToDelete}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlertMessage('success', '✅ Alert deleted successfully');
+            loadActiveAlerts();
+        } else {
+            showAlertMessage('danger', `❌ Error: ${data.message}`);
+        }
+        
+    } catch (error) {
+        console.error('Error deleting alert:', error);
+        showAlertMessage('danger', `❌ Error: ${error.message}`);
+    }
+    
+    alertToDelete = null;
+});
 
 // Load alerts when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -442,3 +470,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
 });
+
+// Make functions available globally
+window.selectCoin = selectCoin;
+window.initChart = initChart;
+window.startAutoRefresh = startAutoRefresh;
+window.deleteAlert = deleteAlert;
