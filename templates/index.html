@@ -123,6 +123,68 @@
             </div>
         </div>
 
+        <!-- Alerts Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">🔔 Set Price Alert</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="alert-form">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="email" class="form-control" id="alert-email" 
+                                        placeholder="Your Email" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-control" id="alert-coin">
+                                        <option value="bitcoin">Bitcoin</option>
+                                        <option value="ethereum">Ethereum</option>
+                                        <option value="cardano">Cardano</option>
+                                        <option value="dogecoin">Dogecoin</option>
+                                        <option value="solana">Solana</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-control" id="alert-condition">
+                                        <option value="above">Price goes above</option>
+                                        <option value="below">Price goes below</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control" id="alert-price" 
+                                        placeholder="Target Price $" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-bell"></i> Set Alert
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="alert-message" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Alerts -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">📋 Active Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="active-alerts">
+                            <p class="text-muted">Loading alerts...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="row mt-4">
             <div class="col-12 text-center">

@@ -1,9 +1,48 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from database import get_latest_prices, init_db
 import json
 from datetime import datetime
+from alerts import AlertSystem
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__)
+
+def check_alerts_job():
+    """Background job για έλεγχο alerts"""
+    with app.app_context():
+        try:
+            # Παίρνουμε τελευταίες τιμές
+            from database import get_latest_prices
+            prices = get_latest_prices()
+            
+            current_prices = {}
+            for coin_name, price, _ in prices:
+                current_prices[coin_name] = price
+            
+            # Ελέγχουμε alerts
+            triggered = alert_system.check_alerts(current_prices)
+            
+            for alert_id, email, coin, price, target, condition in triggered:
+                alert_system.send_email_alert(email, coin, price, target, condition)
+                alert_system.deactivate_alert(alert_id)
+                
+            if triggered:
+                print(f"🎯 Triggered {len(triggered)} alerts at {datetime.now()}")
+                
+        except Exception as e:
+            print(f"❌ Error in alert job: {e}")
+
+# Initialize alert system
+alert_system = AlertSystem()
+
+# Background scheduler για έλεγχο alerts κάθε λεπτό
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=check_alerts_job, trigger="interval", seconds=60)
+scheduler.start()
+
+# Σταμάτα scheduler όταν κλείνει η εφαρμογή
+atexit.register(lambda: scheduler.shutdown())
 
 # Αρχικοποίηση βάσης δεδομένων όταν ξεκινάει η εφαρμογή
 # Αυτό είναι το νέο τρόπο αντί για before_first_request
@@ -18,6 +57,50 @@ def home():
 @app.route('/dashboard')
 def dashboard():
     return render_template('index.html')
+
+@app.route('/api/alerts/add', methods=['POST'])
+def add_alert():
+    """Προσθέτει νέο alert"""
+    try:
+        data = request.json
+        email = data.get('email')
+        coin = data.get('coin')
+        price = float(data.get('price'))
+        condition = data.get('condition')  # 'above' or 'below'
+        
+        alert_id = alert_system.add_alert(email, coin, price, condition)
+        
+        return jsonify({
+            "status": "success",
+            "alert_id": alert_id,
+            "message": f"Alert set for {coin} at ${price}"
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/alerts')
+def get_alerts():
+    """Επιστρέφει όλα τα alerts"""
+    alerts = alert_system.get_active_alerts()
+    
+    result = []
+    for alert_id, email, coin, price, condition in alerts:
+        result.append({
+            "id": alert_id,
+            "email": email,
+            "coin": coin,
+            "price": price,
+            "condition": condition
+        })
+    
+    return jsonify({
+        "status": "success",
+        "alerts": result
+    })
 
 # Endpoint για health check
 @app.route('/api/health')

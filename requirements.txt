@@ -2,3 +2,5 @@ requests==2.31.0
 flask==3.0.0
 pandas==2.0.3
 plotly==5.17.0
+flask-mail==0.9.1
+apscheduler==3.10.4

@@ -317,3 +317,128 @@ function startAutoRefresh() {
 window.selectCoin = selectCoin;
 window.initChart = initChart;
 window.startAutoRefresh = startAutoRefresh;
+
+// Alert form submission
+document.getElementById('alert-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const alertData = {
+        email: document.getElementById('alert-email').value,
+        coin: document.getElementById('alert-coin').value,
+        condition: document.getElementById('alert-condition').value,
+        price: parseFloat(document.getElementById('alert-price').value)
+    };
+    
+    try {
+        const response = await fetch('/api/alerts/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(alertData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlertMessage('success', `✅ Alert set! You'll be notified when ${formatCoinName(alertData.coin)} ${alertData.condition} $${alertData.price}`);
+            document.getElementById('alert-form').reset();
+            loadActiveAlerts(); // Refresh the list
+        } else {
+            showAlertMessage('danger', `❌ Error: ${data.message}`);
+        }
+        
+    } catch (error) {
+        showAlertMessage('danger', `❌ Error: ${error.message}`);
+    }
+});
+
+// Show alert message
+function showAlertMessage(type, message) {
+    const msgDiv = document.getElementById('alert-message');
+    msgDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>`;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        msgDiv.innerHTML = '';
+    }, 5000);
+}
+
+// Load active alerts
+async function loadActiveAlerts() {
+    try {
+        const response = await fetch('/api/alerts');
+        const data = await response.json();
+        
+        const container = document.getElementById('active-alerts');
+        
+        if (data.alerts.length === 0) {
+            container.innerHTML = '<p class="text-muted">No active alerts</p>';
+            return;
+        }
+        
+        let html = '<ul class="list-group">';
+        data.alerts.forEach(alert => {
+            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${formatCoinName(alert.coin)}</strong>
+                        <span class="badge bg-${alert.condition === 'above' ? 'success' : 'danger'} ms-2">
+                            ${alert.condition} $${alert.price}
+                        </span>
+                    </div>
+                    <div>
+                        <small class="text-muted me-3">${alert.email}</small>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAlert(${alert.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading alerts:', error);
+    }
+}
+
+// Delete alert
+async function deleteAlert(alertId) {
+    // Θα το υλοποιήσουμε μετά
+    console.log('Delete alert:', alertId);
+}
+
+// Load alerts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM fully loaded');
+    
+    // Initialize chart
+    if (typeof initChart === 'function') {
+        initChart();
+    } else {
+        console.error('❌ initChart function not found!');
+    }
+    
+    // Start auto-refresh
+    if (typeof startAutoRefresh === 'function') {
+        startAutoRefresh();
+    }
+    
+    // Load active alerts
+    loadActiveAlerts();
+    
+    // Update current time
+    function updateCurrentTime() {
+        const now = new Date();
+        document.getElementById('current-time').textContent = 
+            `Current time: ${now.toLocaleTimeString()}`;
+    }
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+});
