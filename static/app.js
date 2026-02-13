@@ -112,37 +112,161 @@ async function fetchPrices() {
     }
 }
 
-// Display prices in cards
+// Display prices in hybrid mode (5 cards + table)
 function displayPrices(prices) {
-    const container = document.getElementById('prices-container');
+    console.log('📊 Displaying hybrid view with', prices.length, 'coins');
     
     if (!prices || prices.length === 0) {
-        container.innerHTML = `
+        document.getElementById('prices-container').innerHTML = `
             <div class="col-12">
                 <div class="alert alert-warning">
                     No price data available. Make sure the data fetcher is running!
                 </div>
             </div>
         `;
+        document.getElementById('table-view').innerHTML = '';
         return;
     }
     
-    console.log(`📈 Displaying ${prices.length} coins`);
+    // Ορισμός της σειράς των top coins (με βάση market cap rank)
+    const topCoinOrder = [
+        'bitcoin',      // #1
+        'ethereum',     // #2
+        'solana',       // #5
+        'ripple',       // #6
+        'cardano'       // #8
+    ];
     
-    container.innerHTML = prices.map(coin => `
-        <div class="col-md-4 col-lg-2">
-            <div class="card crypto-card h-100 ${coin.coin === currentCoin ? 'selected-coin' : ''}" 
-                 onclick="selectCoin('${coin.coin}')" style="cursor: pointer;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">${formatCoinName(coin.coin)}</h5>
-                    <h3 class="card-text fw-bold ${getPriceChangeClass()}">
-                        $${formatPrice(coin.price)}
-                    </h3>
-                    <small class="text-muted">${formatTimestamp(coin.timestamp)}</small>
+    // Βρες τα top 5 coins με βάση τη λίστα (αν υπάρχουν)
+    const topCoins = [];
+    const otherCoins = [];
+    
+    // Πρώτα βάλε τα top 5 με τη σωστή σειρά
+    topCoinOrder.forEach(coinId => {
+        const found = prices.find(p => p.coin === coinId);
+        if (found) {
+            topCoins.push(found);
+        }
+    });
+    
+    // Μετά βάλε όλα τα υπόλοιπα coins
+    prices.forEach(coin => {
+        if (!topCoinOrder.includes(coin.coin)) {
+            otherCoins.push(coin);
+        }
+    });
+    
+    console.log(`📈 Top 5 coins: ${topCoins.length}, Others: ${otherCoins.length}`);
+    
+    // --- TOP 5 CARDS (με τη σωστή σειρά) ---
+    let cardsHtml = '';
+    topCoins.forEach(coin => {
+        cardsHtml += `
+            <div class="col-md-4 col-lg-2 mb-3">
+                <div class="card crypto-card h-100 ${coin.coin === currentCoin ? 'selected-coin' : ''}" 
+                     onclick="selectCoin('${coin.coin}')" style="cursor: pointer;">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">${formatCoinName(coin.coin)}</h5>
+                        <h4 class="card-text fw-bold ${getPriceChangeClass()}">
+                            $${formatPrice(coin.price)}
+                        </h4>
+                        <small class="text-muted">${formatTimestamp(coin.timestamp)}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    document.getElementById('prices-container').innerHTML = cardsHtml;
+    
+    // --- TABLE FOR ALL COINS (top5 + others) ---
+    // Βάλε όλα τα coins μαζί (πρώτα τα top5 με σειρά, μετά τα υπόλοιπα)
+    const allCoinsForTable = [...topCoins, ...otherCoins];
+    
+    let tableHtml = `
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📋 All Cryptocurrencies (${prices.length} coins)</h5>
+                <span class="badge bg-light text-dark">Click any row to view chart</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Coin</th>
+                                <th>Symbol</th>
+                                <th>Price (USD)</th>
+                                <th>24h Change</th>
+                                <th>Last Update</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+    
+    allCoinsForTable.forEach((coin, index) => {
+        // Random 24h change for demo (in real app would come from API)
+        const change = (Math.random() * 10 - 5).toFixed(2);
+        const changeClass = change >= 0 ? 'text-success' : 'text-danger';
+        const changeIcon = change >= 0 ? '▲' : '▼';
+        
+        tableHtml += `
+            <tr onclick="selectCoin('${coin.coin}')" style="cursor: pointer;"
+                class="${coin.coin === currentCoin ? 'table-primary' : ''}">
+                <td>${index + 1}</td>
+                <td><strong>${formatCoinName(coin.coin)}</strong></td>
+                <td><code>${getSymbol(coin.coin)}</code></td>
+                <td class="fw-bold">$${formatPrice(coin.price)}</td>
+                <td class="${changeClass}">${changeIcon} ${Math.abs(change)}%</td>
+                <td><small class="text-muted">${formatTimestamp(coin.timestamp)}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            onclick="event.stopPropagation(); selectCoin('${coin.coin}')">
+                        📊 View Chart
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableHtml += `
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    
+    document.getElementById('table-view').innerHTML = tableHtml;
+}
+
+// Get coin symbol
+function getSymbol(coinId) {
+    const symbols = {
+        'bitcoin': 'BTC',
+        'ethereum': 'ETH', 
+        'cardano': 'ADA',
+        'dogecoin': 'DOGE',
+        'solana': 'SOL',
+        'ripple': 'XRP',
+        'polkadot': 'DOT',
+        'litecoin': 'LTC',
+        'chainlink': 'LINK',
+        'stellar': 'XLM',
+        'monero': 'XMR',
+        'tron': 'TRX',
+        'vechain': 'VET',
+        'tezos': 'XTZ',
+        'cosmos': 'ATOM',
+        'avalanche-2': 'AVAX',
+        'algorand': 'ALGO',
+        'filecoin': 'FIL',
+        'aave': 'AAVE',
+        'maker': 'MKR'
+    };
+    return symbols[coinId] || coinId.substring(0, 4).toUpperCase();
 }
 
 // Fetch historical data for charts
@@ -221,19 +345,40 @@ function updateCoinInfo(coinName, currentPrice) {
         'ethereum': { symbol: 'ETH', description: 'Blockchain with smart contracts' },
         'cardano': { symbol: 'ADA', description: 'Proof-of-stake blockchain' },
         'dogecoin': { symbol: 'DOGE', description: 'Meme-based cryptocurrency' },
-        'solana': { symbol: 'SOL', description: 'High-performance blockchain' }
+        'solana': { symbol: 'SOL', description: 'High-performance blockchain' },
+        'ripple': { symbol: 'XRP', description: 'Digital payment protocol for banks' },
+        'polkadot': { symbol: 'DOT', description: 'Multi-chain blockchain platform' },
+        'litecoin': { symbol: 'LTC', description: 'Peer-to-peer cryptocurrency' },
+        'chainlink': { symbol: 'LINK', description: 'Decentralized oracle network' },
+        'stellar': { symbol: 'XLM', description: 'Open network for money transfers' },
+        'monero': { symbol: 'XMR', description: 'Privacy-focused cryptocurrency' },
+        'tron': { symbol: 'TRX', description: 'Blockchain for digital entertainment' },
+        'vechain': { symbol: 'VET', description: 'Supply chain management blockchain' },
+        'tezos': { symbol: 'XTZ', description: 'Self-amending blockchain' },
+        'cosmos': { symbol: 'ATOM', description: 'Internet of Blockchains' },
+        'avalanche-2': { symbol: 'AVAX', description: 'High-speed blockchain platform' },
+        'algorand': { symbol: 'ALGO', description: 'Pure proof-of-stake blockchain' },
+        'filecoin': { symbol: 'FIL', description: 'Decentralized storage network' },
+        'aave': { symbol: 'AAVE', description: 'Decentralized lending protocol' },
+        'maker': { symbol: 'MKR', description: 'Stablecoin governance token' }
     };
     
-    const info = coinInfo[coinName] || { symbol: coinName.toUpperCase(), description: 'Cryptocurrency' };
+    const info = coinInfo[coinName] || { 
+        symbol: getSymbol(coinName), 
+        description: 'Cryptocurrency' 
+    };
     
     infoDiv.innerHTML = `
         <div class="alert alert-primary">
-            <h5>${formatCoinName(coinName)} (${info.symbol})</h5>
-            <p class="mb-1">${info.description}</p>
-            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">${formatCoinName(coinName)}</h5>
+                <span class="badge bg-secondary">${info.symbol}</span>
+            </div>
+            <p class="mb-2 small">${info.description}</p>
+            <hr class="my-2">
             <div class="d-flex justify-content-between">
                 <span>Current Price:</span>
-                <strong>$${formatPrice(currentPrice)}</strong>
+                <strong class="${getPriceChangeClass()}">$${formatPrice(currentPrice)}</strong>
             </div>
             <div class="d-flex justify-content-between">
                 <span>Market Cap Rank:</span>
@@ -261,11 +406,26 @@ function selectCoin(coinId) {
 // Helper functions
 function formatCoinName(coinId) {
     const names = {
-        'bitcoin': 'Bitcoin',
-        'ethereum': 'Ethereum', 
-        'cardano': 'Cardano',
-        'dogecoin': 'Dogecoin',
-        'solana': 'Solana'
+        'bitcoin': 'Bitcoin (BTC)',
+        'ethereum': 'Ethereum (ETH)', 
+        'cardano': 'Cardano (ADA)',
+        'dogecoin': 'Dogecoin (DOGE)',
+        'solana': 'Solana (SOL)',
+        'ripple': 'Ripple (XRP)',
+        'polkadot': 'Polkadot (DOT)',
+        'litecoin': 'Litecoin (LTC)',
+        'chainlink': 'Chainlink (LINK)',
+        'stellar': 'Stellar (XLM)',
+        'monero': 'Monero (XMR)',
+        'tron': 'TRON (TRX)',
+        'vechain': 'VeChain (VET)',
+        'tezos': 'Tezos (XTZ)',
+        'cosmos': 'Cosmos (ATOM)',
+        'avalanche-2': 'Avalanche (AVAX)',
+        'algorand': 'Algorand (ALGO)',
+        'filecoin': 'Filecoin (FIL)',
+        'aave': 'Aave (AAVE)',
+        'maker': 'Maker (MKR)'
     };
     return names[coinId] || coinId.charAt(0).toUpperCase() + coinId.slice(1);
 }
@@ -301,7 +461,22 @@ function getRank(coinName) {
         'ethereum': 2,
         'solana': 5,
         'cardano': 8,
-        'dogecoin': 10
+        'dogecoin': 10,
+        'ripple': 6,
+        'polkadot': 11,
+        'litecoin': 14,
+        'chainlink': 15,
+        'stellar': 24,
+        'monero': 26,
+        'tron': 17,
+        'vechain': 28,
+        'tezos': 35,
+        'cosmos': 20,
+        'avalanche-2': 9,
+        'algorand': 30,
+        'filecoin': 32,
+        'aave': 38,
+        'maker': 45
     };
     return ranks[coinName] || 'N/A';
 }

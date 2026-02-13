@@ -3,7 +3,28 @@ import time
 from database import insert_price, init_db
 
 # Λίστα με τα νομίσματα που θέλουμε να παρακολουθούμε
-COINS = ['bitcoin', 'ethereum', 'cardano', 'dogecoin', 'solana']
+COINS = [
+    'bitcoin',           # BTC
+    'ethereum',          # ETH
+    'cardano',          # ADA
+    'dogecoin',         # DOGE
+    'solana',           # SOL
+    'ripple',           # XRP
+    'polkadot',         # DOT
+    'litecoin',         # LTC
+    'chainlink',        # LINK
+    'stellar',          # XLM
+    'monero',           # XMR
+    'tron',             # TRX
+    'vechain',          # VET
+    'tezos',            # XTZ
+    'cosmos',           # ATOM
+    'avalanche-2',      # AVAX (το ID στο CoinGecko είναι avalanche-2)
+    'algorand',         # ALGO
+    'filecoin',         # FIL
+    'aave',             # AAVE
+    'maker'             # MKR
+]
 
 def fetch_crypto_prices():
     """Τραβάει τις τιμές από το CoinGecko API"""
