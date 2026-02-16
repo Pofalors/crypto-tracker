@@ -190,6 +190,18 @@
         .dark-mode .header {
             background: linear-gradient(135deg, #1a2a3a 0%, #2a3a4a 100%);
         }
+        /* Indicator buttons */
+        .btn-group .btn.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .dark-mode .btn-group .btn.active {
+            background-color: #4dabf7;
+            border-color: #4dabf7;
+            color: #1a1a1a;
+        }
     </style>
 </head>
 <body>
@@ -237,6 +249,21 @@
                     <div class="card-body">
                         <h3 class="card-title mb-3" id="chart-title">Bitcoin - Price History</h3>
                         <div class="chart-container">
+                            <div class="card crypto-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h3 class="card-title mb-0" id="chart-title">Bitcoin - Price History</h3>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="toggleIndicator('sma')" id="smaBtn">SMA</button>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="toggleIndicator('ema')" id="emaBtn">EMA</button>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="toggleIndicator('rsi')" id="rsiBtn">RSI</button>
+                                        </div>
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="priceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
                             <canvas id="priceChart"></canvas>
                         </div>
                     </div>

@@ -3,6 +3,10 @@ console.log('📊 Crypto Tracker Dashboard JavaScript loaded');
 // Global variables
 let priceChart = null;
 let currentCoin = 'bitcoin';
+// Global variables for indicators
+let currentIndicator = null;
+let originalPrices = [];
+let originalTimestamps = [];
 
 // Function to initialize the chart
 function initChart() {
@@ -673,6 +677,254 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
     
     alertToDelete = null;
 });
+
+// Calculate Simple Moving Average (SMA)
+function calculateSMA(data, period = 7) {
+    let sma = [];
+    for (let i = period - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+            sum += data[i - j];
+        }
+        sma.push(sum / period);
+    }
+    return sma;
+}
+
+// Calculate Exponential Moving Average (EMA)
+function calculateEMA(data, period = 7) {
+    let ema = [];
+    const multiplier = 2 / (period + 1);
+    
+    // First EMA is SMA
+    let sum = 0;
+    for (let i = 0; i < period; i++) {
+        sum += data[i];
+    }
+    ema.push(sum / period);
+    
+    // Calculate subsequent EMAs
+    for (let i = period; i < data.length; i++) {
+        const value = (data[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1];
+        ema.push(value);
+    }
+    return ema;
+}
+
+// Calculate Relative Strength Index (RSI)
+function calculateRSI(data, period = 14) {
+    let rsi = [];
+    let gains = [];
+    let losses = [];
+    
+    // Calculate price changes
+    for (let i = 1; i < data.length; i++) {
+        const change = data[i] - data[i - 1];
+        gains.push(change > 0 ? change : 0);
+        losses.push(change < 0 ? -change : 0);
+    }
+    
+    // Calculate RSI for each point after the period
+    for (let i = period; i < gains.length; i++) {
+        let avgGain = 0;
+        let avgLoss = 0;
+        
+        for (let j = 0; j < period; j++) {
+            avgGain += gains[i - j];
+            avgLoss += losses[i - j];
+        }
+        
+        avgGain /= period;
+        avgLoss /= period;
+        
+        if (avgLoss === 0) {
+            rsi.push(100);
+        } else {
+            const rs = avgGain / avgLoss;
+            rsi.push(100 - (100 / (1 + rs)));
+        }
+    }
+    
+    return rsi;
+}
+
+// Toggle indicator on/off
+function toggleIndicator(indicator) {
+    // Reset button styles
+    document.getElementById('smaBtn').classList.remove('active');
+    document.getElementById('emaBtn').classList.remove('active');
+    document.getElementById('rsiBtn').classList.remove('active');
+    
+    if (currentIndicator === indicator) {
+        // Turn off indicator
+        currentIndicator = null;
+        updateChart(originalPrices, originalTimestamps, currentCoin);
+    } else {
+        // Turn on new indicator
+        currentIndicator = indicator;
+        document.getElementById(indicator + 'Btn').classList.add('active');
+        
+        // Calculate and add indicator to chart
+        addIndicatorToChart(indicator);
+    }
+}
+
+// Add indicator to chart
+function addIndicatorToChart(indicator) {
+    if (!priceChart || originalPrices.length === 0) return;
+    
+    let indicatorData = [];
+    let indicatorLabel = '';
+    let indicatorColor = '';
+    
+    switch(indicator) {
+        case 'sma':
+            indicatorData = calculateSMA(originalPrices, 7);
+            indicatorLabel = 'SMA (7)';
+            indicatorColor = '#ff9800';  // Orange
+            break;
+        case 'ema':
+            indicatorData = calculateEMA(originalPrices, 7);
+            indicatorLabel = 'EMA (7)';
+            indicatorColor = '#9c27b0';  // Purple
+            break;
+        case 'rsi':
+            indicatorData = calculateRSI(originalPrices, 14);
+            indicatorLabel = 'RSI (14)';
+            indicatorColor = '#f44336';  // Red
+            break;
+    }
+    
+    // Adjust dataset for RSI (different scale)
+    if (indicator === 'rsi') {
+        // Remove price dataset temporarily
+        priceChart.data.datasets = priceChart.data.datasets.filter(d => d.label !== 'Price (USD)');
+        
+        // Add RSI dataset
+        priceChart.data.datasets.push({
+            label: indicatorLabel,
+            data: indicatorData,
+            borderColor: indicatorColor,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 2,
+            yAxisID: 'y-rsi'
+        });
+        
+        // Add RSI y-axis
+        priceChart.options.scales['y-rsi'] = {
+            position: 'right',
+            min: 0,
+            max: 100,
+            grid: {
+                drawOnChartArea: false,
+            },
+            title: {
+                display: true,
+                text: 'RSI'
+            }
+        };
+        
+        // Adjust main y-axis title
+        priceChart.options.scales.y.title.text = 'Price (USD)';
+    } else {
+        // For SMA/EMA, add as new dataset
+        priceChart.data.datasets.push({
+            label: indicatorLabel,
+            data: indicatorData,
+            borderColor: indicatorColor,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.3,
+            pointRadius: 0
+        });
+        
+        // Remove RSI axis if exists
+        if (priceChart.options.scales['y-rsi']) {
+            delete priceChart.options.scales['y-rsi'];
+        }
+    }
+    
+    priceChart.update();
+}
+
+// Modify updateChart to store original data
+function updateChart(prices, timestamps, coinName) {
+    if (!priceChart) {
+        console.error('❌ Chart not initialized!');
+        return;
+    }
+    
+    console.log(`🔄 Updating chart with ${prices.length} points`);
+    
+    // Store original data for indicators
+    originalPrices = [...prices];
+    originalTimestamps = [...timestamps];
+    
+    // Format timestamps
+    const formattedTimestamps = timestamps.map(ts => {
+        const date = new Date(ts);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    });
+    
+    // Clear existing datasets except the first one (price)
+    if (priceChart.data.datasets.length > 1) {
+        priceChart.data.datasets = [priceChart.data.datasets[0]];
+    }
+    
+    // Update main price dataset
+    priceChart.data.labels = formattedTimestamps;
+    priceChart.data.datasets[0].data = prices;
+    priceChart.data.datasets[0].label = `${formatCoinName(coinName)} Price`;
+    
+    // Update colors based on price trend
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
+    const isUp = lastPrice > firstPrice;
+    
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    
+    // Update chart colors based on theme
+    if (isDarkMode) {
+        priceChart.options.scales.x.grid.color = 'rgba(255,255,255,0.1)';
+        priceChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+        priceChart.options.scales.x.ticks.color = '#e0e0e0';
+        priceChart.options.scales.y.ticks.color = '#e0e0e0';
+        priceChart.options.plugins.legend.labels.color = '#e0e0e0';
+    } else {
+        priceChart.options.scales.x.grid.color = 'rgba(0,0,0,0.05)';
+        priceChart.options.scales.y.grid.color = 'rgba(0,0,0,0.05)';
+        priceChart.options.scales.x.ticks.color = '#666';
+        priceChart.options.scales.y.ticks.color = '#666';
+        priceChart.options.plugins.legend.labels.color = '#666';
+    }
+    
+    priceChart.data.datasets[0].borderColor = isUp ? '#00c853' : '#ff4444';
+    priceChart.data.datasets[0].backgroundColor = isUp ? 
+        'rgba(0, 200, 83, 0.1)' : 'rgba(255, 68, 68, 0.1)';
+    
+    // Remove RSI axis if exists
+    if (priceChart.options.scales['y-rsi']) {
+        delete priceChart.options.scales['y-rsi'];
+    }
+    
+    // Update chart
+    priceChart.update();
+    
+    // Update title
+    document.getElementById('chart-title').textContent = 
+        `${formatCoinName(coinName)} - Last ${prices.length} prices`;
+    
+    // Update coin info
+    updateCoinInfo(coinName, prices[prices.length - 1]);
+    
+    // Reapply current indicator if exists
+    if (currentIndicator) {
+        addIndicatorToChart(currentIndicator);
+    }
+}
 
 // Load alerts when page loads
 document.addEventListener('DOMContentLoaded', function() {
