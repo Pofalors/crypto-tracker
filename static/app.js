@@ -206,7 +206,7 @@ function displayPrices(prices) {
     let cardsHtml = '';
     topCoins.forEach(coin => {
         cardsHtml += `
-            <div class="col-md-4 col-lg-2 mb-3">
+            <div class="col-6 col-md-4 col-lg-2 mb-2 mb-md-3">
                 <div class="card crypto-card h-100 ${coin.coin === currentCoin ? 'selected-coin' : ''}" 
                      onclick="selectCoin('${coin.coin}')" style="cursor: pointer;">
                     <div class="card-body text-center">
@@ -238,12 +238,12 @@ function displayPrices(prices) {
                     <table class="table table-hover table-striped mb-0">
                         <thead class="sticky-top bg-light">
                             <tr>
-                                <th>#</th>
+                                <th class="d-none d-sm-table-cell">#</th>
                                 <th>Coin</th>
-                                <th>Symbol</th>
-                                <th>Price (USD)</th>
-                                <th>24h Change</th>
-                                <th>Last Update</th>
+                                <th class="d-none d-sm-table-cell">Symbol</th>
+                                <th>Price</th>
+                                <th class="d-none d-md-table-cell">24h</th>
+                                <th class="d-none d-lg-table-cell">Update</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -259,16 +259,17 @@ function displayPrices(prices) {
         tableHtml += `
             <tr onclick="selectCoin('${coin.coin}')" style="cursor: pointer;"
                 class="${coin.coin === currentCoin ? 'table-primary' : ''}">
-                <td>${index + 1}</td>
-                <td><strong>${formatCoinName(coin.coin)}</strong></td>
-                <td><code>${getSymbol(coin.coin)}</code></td>
+                <td class="d-none d-sm-table-cell">${index + 1}</td>
+                <td><strong>${window.innerWidth < 576 ? formatCoinNameShort(coin.coin) : formatCoinName(coin.coin)}</strong></td>
+                <td class="d-none d-sm-table-cell"><code>${getSymbol(coin.coin)}</code></td>
                 <td class="fw-bold">$${formatPrice(coin.price)}</td>
-                <td class="${changeClass}">${changeIcon} ${Math.abs(change)}%</td>
-                <td><small class="text-muted">${formatTimestamp(coin.timestamp)}</small></td>
+                <td class="d-none d-md-table-cell ${changeClass}">${changeIcon} ${Math.abs(change)}%</td>
+                <td class="d-none d-lg-table-cell"><small>${formatTimestamp(coin.timestamp)}</small></td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" 
                             onclick="event.stopPropagation(); selectCoin('${coin.coin}')">
-                        📊 View Chart
+                        <span class="d-none d-sm-inline">📊 Chart</span>
+                        <span class="d-sm-none">📊</span>
                     </button>
                 </td>
             </tr>
@@ -489,6 +490,33 @@ function formatCoinName(coinId) {
         'maker': 'Maker (MKR)'
     };
     return names[coinId] || coinId.charAt(0).toUpperCase() + coinId.slice(1);
+}
+
+// Short coin names for mobile
+function formatCoinNameShort(coinId) {
+    const shortNames = {
+        'bitcoin': 'BTC',
+        'ethereum': 'ETH', 
+        'cardano': 'ADA',
+        'dogecoin': 'DOGE',
+        'solana': 'SOL',
+        'ripple': 'XRP',
+        'polkadot': 'DOT',
+        'litecoin': 'LTC',
+        'chainlink': 'LINK',
+        'stellar': 'XLM',
+        'monero': 'XMR',
+        'tron': 'TRX',
+        'vechain': 'VET',
+        'tezos': 'XTZ',
+        'cosmos': 'ATOM',
+        'avalanche-2': 'AVAX',
+        'algorand': 'ALGO',
+        'filecoin': 'FIL',
+        'aave': 'AAVE',
+        'maker': 'MKR'
+    };
+    return shortNames[coinId] || coinId.substring(0, 4).toUpperCase();
 }
 
 function formatPrice(price) {
