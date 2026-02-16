@@ -156,6 +156,151 @@ function loadDarkModePreference() {
     }
 }
 
+// Export to CSV
+async function exportToCSV() {
+    console.log('📥 Exporting data to CSV...');
+    
+    try {
+        // Fetch latest prices
+        const response = await fetch('/api/prices');
+        const data = await response.json();
+        
+        if (data.status !== 'success' || !data.data) {
+            showAlertMessage('danger', '❌ No data to export');
+            return;
+        }
+        
+        const prices = data.data;
+        
+        // Create CSV content
+        let csvContent = "Coin,Symbol,Price (USD),Timestamp\n";
+        
+        prices.forEach(coin => {
+            const row = [
+                formatCoinName(coin.coin),
+                getSymbol(coin.coin),
+                coin.price,
+                new Date(coin.timestamp).toLocaleString()
+            ].join(',');
+            csvContent += row + '\n';
+        });
+        
+        // Add summary at the end
+        csvContent += `\n# Total Coins,${prices.length}\n`;
+        csvContent += `# Export Date,${new Date().toLocaleString()}\n`;
+        
+        // Download the file
+        downloadCSV(csvContent, `crypto-prices-${new Date().toISOString().slice(0,10)}.csv`);
+        
+        showAlertMessage('success', `✅ Exported ${prices.length} coins to CSV`);
+        
+    } catch (error) {
+        console.error('❌ Error exporting data:', error);
+        showAlertMessage('danger', `❌ Error: ${error.message}`);
+    }
+}
+
+// Download CSV file
+function downloadCSV(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`✅ Downloaded: ${filename}`);
+}
+
+// Export full history for a specific coin
+async function exportCoinHistory(coinName) {
+    console.log(`📥 Exporting history for ${coinName}...`);
+    
+    try {
+        const response = await fetch(`/api/history/${coinName}`);
+        const data = await response.json();
+        
+        if (data.status !== 'success' || !data.prices) {
+            showAlertMessage('danger', '❌ No historical data available');
+            return;
+        }
+        
+        // Create CSV content
+        let csvContent = "Timestamp,Price (USD)\n";
+        
+        for (let i = 0; i < data.prices.length; i++) {
+            const row = [
+                new Date(data.timestamps[i]).toLocaleString(),
+                data.prices[i]
+            ].join(',');
+            csvContent += row + '\n';
+        }
+        
+        // Add summary
+        csvContent += `\n# Total Data Points,${data.prices.length}\n`;
+        csvContent += `# Coin,${formatCoinName(coinName)}\n`;
+        csvContent += `# Export Date,${new Date().toLocaleString()}\n`;
+        
+        // Download the file
+        downloadCSV(csvContent, `${coinName}-history-${new Date().toISOString().slice(0,10)}.csv`);
+        
+        showAlertMessage('success', `✅ Exported ${data.prices.length} data points for ${formatCoinName(coinName)}`);
+        
+    } catch (error) {
+        console.error('❌ Error exporting history:', error);
+        showAlertMessage('danger', `❌ Error: ${error.message}`);
+    }
+}
+
+// Export all alerts
+async function exportAlerts() {
+    console.log('📥 Exporting alerts...');
+    
+    try {
+        const response = await fetch('/api/alerts');
+        const data = await response.json();
+        
+        if (data.status !== 'success' || !data.alerts) {
+            showAlertMessage('danger', '❌ No alerts to export');
+            return;
+        }
+        
+        const alerts = data.alerts;
+        
+        // Create CSV content
+        let csvContent = "ID,Email,Coin,Condition,Target Price,Status\n";
+        
+        alerts.forEach(alert => {
+            const row = [
+                alert.id,
+                alert.email,
+                formatCoinName(alert.coin),
+                alert.condition,
+                alert.price,
+                'Active'
+            ].join(',');
+            csvContent += row + '\n';
+        });
+        
+        csvContent += `\n# Total Active Alerts,${alerts.length}\n`;
+        csvContent += `# Export Date,${new Date().toLocaleString()}\n`;
+        
+        // Download the file
+        downloadCSV(csvContent, `alerts-${new Date().toISOString().slice(0,10)}.csv`);
+        
+        showAlertMessage('success', `✅ Exported ${alerts.length} alerts to CSV`);
+        
+    } catch (error) {
+        console.error('❌ Error exporting alerts:', error);
+        showAlertMessage('danger', `❌ Error: ${error.message}`);
+    }
+}
+
 // Display prices in hybrid mode (5 cards + table)
 function displayPrices(prices) {
     console.log('📊 Displaying hybrid view with', prices.length, 'coins');
@@ -231,7 +376,13 @@ function displayPrices(prices) {
         <div class="card mt-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">📋 All Cryptocurrencies (${prices.length} coins)</h5>
-                <span class="badge bg-light text-dark">Click any row to view chart</span>
+                <div>
+                    <button class="btn btn-light btn-sm me-2" onclick="exportToCSV()">
+                        <span class="d-none d-sm-inline">📥 Export All</span>
+                        <span class="d-sm-none">📥</span>
+                    </button>
+                    <span class="badge bg-light text-dark d-none d-md-inline">Click any row to view chart</span>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -266,11 +417,18 @@ function displayPrices(prices) {
                 <td class="d-none d-md-table-cell ${changeClass}">${changeIcon} ${Math.abs(change)}%</td>
                 <td class="d-none d-lg-table-cell"><small>${formatTimestamp(coin.timestamp)}</small></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" 
-                            onclick="event.stopPropagation(); selectCoin('${coin.coin}')">
-                        <span class="d-none d-sm-inline">📊 Chart</span>
-                        <span class="d-sm-none">📊</span>
-                    </button>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" 
+                                onclick="event.stopPropagation(); selectCoin('${coin.coin}')">
+                            <span class="d-none d-sm-inline">📊 Chart</span>
+                            <span class="d-sm-none">📊</span>
+                        </button>
+                        <button class="btn btn-outline-success" 
+                                onclick="event.stopPropagation(); exportCoinHistory('${coin.coin}')">
+                            <span class="d-none d-sm-inline">📥 CSV</span>
+                            <span class="d-sm-none">📥</span>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -990,3 +1148,9 @@ window.selectCoin = selectCoin;
 window.initChart = initChart;
 window.startAutoRefresh = startAutoRefresh;
 window.deleteAlert = deleteAlert;
+window.toggleDarkMode = toggleDarkMode;
+window.loadDarkModePreference = loadDarkModePreference;
+window.toggleIndicator = toggleIndicator;
+window.exportToCSV = exportToCSV;
+window.exportCoinHistory = exportCoinHistory;
+window.exportAlerts = exportAlerts;
