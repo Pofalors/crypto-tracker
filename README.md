@@ -11,22 +11,62 @@ A full-stack web application for tracking cryptocurrency prices in real-time wit
 
 ## ✨ Features
 
-- **📊 Real-Time Prices**: Live cryptocurrency prices from CoinGecko API
-- **📈 Interactive Charts**: Dynamic charts with Chart.js
-- **🔧 REST API**: Fully documented RESTful endpoints
-- **💾 SQLite Database**: Local data storage with historical tracking
-- **🎨 Modern UI**: Responsive design with Bootstrap 5
-- **🔄 Auto-Refresh**: Automatic updates every 30 seconds
+### 📊 **Real-Time Data**
+- Live prices from CoinGecko API
+- 20+ supported cryptocurrencies
+- Auto-refresh every 30 seconds
+- Historical data storage with SQLite
+
+### 📈 **Technical Analysis**
+- SMA (Simple Moving Average)
+- EMA (Exponential Moving Average)
+- RSI (Relative Strength Index)
+- Dynamic chart colors based on trend
+
+### 🤖 **Trading Bot Simulator**
+- Virtual portfolio with $10,000 starting balance
+- Buy/Sell cryptocurrencies in real-time
+- Real-time P&L tracking
+- Transaction history
+- Portfolio value calculation
+
+### 🎨 **User Experience**
+- Dark/Light mode toggle (saves preference)
+- Fully responsive design (mobile, tablet, desktop)
+- Interactive charts with Chart.js
+- Hybrid view: Top 5 coins as cards + all coins in table
+
+### 📥 **Data Management**
+- Export all prices to CSV
+- Export individual coin history
+- Export active alerts
+- Download historical data
+
+### 🔔 **Alert System**
+- Set price alerts for any coin
+- Email notifications (print to console for demo)
+- Active alerts management with delete
+- Alert history tracking
+
+### 📱 **Mobile Optimized**
+- 2 cards per row on mobile
+- Touch-friendly tap targets
+- Hidden columns for small screens
+- Responsive tables with horizontal scroll
 
 ## 🏗️ Architecture
 ```
 crypto-tracker/
-├── app.py # Flask application
+├── app.py # Flask application (main)
 ├── database.py # Database operations
 ├── data_fetcher.py # API data fetching
+├── alerts.py # Price alert system
+├── trading.py # Trading bot simulator
 ├── requirements.txt # Python dependencies
 ├── README.md # This file
 ├── .gitignore # Git ignore rules
+├── Dockerfile # Docker configuration
+├── docker-compose.yml # Docker compose setup
 ├── static/
 │ └── app.js # Frontend JavaScript
 └── templates/
@@ -116,21 +156,64 @@ docker rm crypto-tracker
 | GET | `/api/health` | Check API health status |
 | GET | `/dashboard` | Interactive dashboard |
 
+# Alert System
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/alerts` | Get all active alerts |
+| POST | `/api/alerts/add` | Create new price alert |
+| DELETE | `/api/alerts/{id}` | Delete specific alert |
+
+# Trading Bot
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/trading/balance` | Get current USD balance |
+| GET | `/api/trading/portfolio` | Get current holdings |
+| GET | `/api/trading/transactions` | Get transaction history |
+| GET | `/api/trading/portfolio-value` | Get total portfolio value |
+| POST | `/api/trading/buy` | Buy cryptocurrency |
+| POST | `/api/trading/sell` | Sell cryptocurrency |
+
 
 ## Technologies Used
 
-- Backend: Python, Flask, SQLite
+- Backend: Python, Flask, SQLite, APScheduler, Requests
 - Frontend: HTML5, CSS3, JavaScript, Bootstrap 5, Chart.js
+- DevOps: Docker, GitHub Actions(CI/CD ready)
 - APIs: CoinGecko AP
 - Tools: Git, VS Code
 
-## 📊 Supported Cryptocurrencies
+## 📊 Supported Cryptocurrencies (TOP 5)
 
 - Bitcoin (BTC)
 - Ethereum (ETH)
 - Cardano (ADA)
 - Dogecoin (DOGE)
 - Solana (SOL)
+
+## 🎯 Key Features Explained
+
+# Technical Indicators
+
+- SMA (Simple Moving Average): 7-period average showing trend direction
+- EMA (Exponential Moving Average): Weighted average reacting faster to price changes
+- RSI (Relative Strength Index): 0-100 scale indicating overbought (>70) or oversold (<30) conditions
+
+# Trading Bot
+
+- Start with $10,000 virtual USD
+- Buy/sell any supported cryptocurrency
+- Real-time P&L calculation
+- Average buy price tracking
+- Complete transaction history
+
+# Alert System
+
+- Set price alerts for any coin
+- Choose "above" or "below" conditions
+- Email notifications (console for demo)
+- Active alerts management
 
 ## 🤝 Contributing
 
