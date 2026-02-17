@@ -301,6 +301,172 @@ async function exportAlerts() {
     }
 }
 
+// Trading Bot Functions
+async function loadTradingData() {
+    try {
+        // Load portfolio value
+        const valueResponse = await fetch('/api/trading/portfolio-value');
+        const valueData = await valueResponse.json();
+        
+        if (valueData.status === 'success') {
+            document.getElementById('usd-balance').textContent = 
+                `$${valueData.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('portfolio-value').textContent = 
+                `$${valueData.portfolio_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('net-worth').textContent = 
+                `$${valueData.total_net_worth.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            displayHoldings(valueData.holdings);
+        }
+        
+        // Load transactions
+        const txResponse = await fetch('/api/trading/transactions');
+        const txData = await txResponse.json();
+        
+        if (txData.status === 'success') {
+            displayTransactions(txData.transactions);
+        }
+        
+    } catch (error) {
+        console.error('Error loading trading data:', error);
+    }
+}
+
+function displayHoldings(holdings) {
+    const tbody = document.getElementById('holdings-table');
+    
+    if (!holdings || holdings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No holdings</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    holdings.forEach(h => {
+        const pnlClass = h.profit_loss >= 0 ? 'text-success' : 'text-danger';
+        const pnlSign = h.profit_loss >= 0 ? '+' : '';
+        
+        html += `
+            <tr>
+                <td><strong>${formatCoinName(h.coin)}</strong></td>
+                <td>${h.amount.toFixed(4)}</td>
+                <td>$${formatPrice(h.avg_price)}</td>
+                <td>$${formatPrice(h.current_price)}</td>
+                <td>$${formatPrice(h.value)}</td>
+                <td class="${pnlClass}">${pnlSign}$${formatPrice(Math.abs(h.profit_loss))}</td>
+                <td class="${pnlClass}">${pnlSign}${h.profit_loss_pct.toFixed(2)}%</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-success" onclick="quickSell('${h.coon}')">Sell</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function displayTransactions(transactions) {
+    const tbody = document.getElementById('transactions-table');
+    
+    if (!transactions || transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No transactions</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    transactions.forEach(t => {
+        const typeClass = t.type === 'buy' ? 'text-success' : 'text-danger';
+        const typeIcon = t.type === 'buy' ? '▲' : '▼';
+        const date = new Date(t.timestamp);
+        const timeStr = date.toLocaleTimeString();
+        
+        html += `
+            <tr>
+                <td class="${typeClass}">${typeIcon} ${t.type.toUpperCase()}</td>
+                <td>${formatCoinName(t.coin)}</td>
+                <td>${t.amount.toFixed(4)}</td>
+                <td>$${formatPrice(t.price)}</td>
+                <td>$${formatPrice(t.total)}</td>
+                <td><small>${timeStr}</small></td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Handle trade form
+document.getElementById('trade-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const coin = document.getElementById('trade-coin').value;
+    const amount = parseFloat(document.getElementById('trade-amount').value);
+    const type = document.getElementById('trade-type').value;
+    const btn = document.getElementById('trade-btn');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+    
+    try {
+        const response = await fetch(`/api/trading/${type}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ coin, amount })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlertMessage('success', data.message);
+            document.getElementById('trade-amount').value = '';
+            loadTradingData(); // Refresh data
+        } else {
+            showAlertMessage('danger', data.message);
+        }
+        
+    } catch (error) {
+        showAlertMessage('danger', `Error: ${error.message}`);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Execute Trade';
+    }
+});
+
+// Quick sell function
+function quickSell(coin) {
+    document.getElementById('trade-coin').value = coin;
+    document.getElementById('trade-type').value = 'sell';
+    document.getElementById('trade-amount').focus();
+}
+
+// Update estimated value when amount changes
+document.getElementById('trade-amount').addEventListener('input', async function() {
+    const coin = document.getElementById('trade-coin').value;
+    const amount = parseFloat(this.value) || 0;
+    
+    if (amount <= 0) {
+        document.getElementById('estimated-value').textContent = 'Estimated value: $0.00';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/prices');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const coinData = data.data.find(p => p.coin === coin);
+            if (coinData) {
+                const value = amount * coinData.price;
+                document.getElementById('estimated-value').textContent = 
+                    `Estimated value: $${formatPrice(value)}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error estimating value:', error);
+    }
+});
+
 // Display prices in hybrid mode (5 cards + table)
 function displayPrices(prices) {
     console.log('📊 Displaying hybrid view with', prices.length, 'coins');
@@ -1141,6 +1307,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
+    loadTradingData();
+    setInterval(loadTradingData, 30000);
 });
 
 // Make functions available globally

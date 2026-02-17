@@ -6,6 +6,7 @@ from alerts import AlertSystem
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import sqlite3
+from trading import TradingBot
 
 app = Flask(__name__)
 
@@ -36,6 +37,8 @@ def check_alerts_job():
 
 # Initialize alert system
 alert_system = AlertSystem()
+# Initialize trading bot
+trading_bot = TradingBot()
 
 # Background scheduler για έλεγχο alerts κάθε λεπτό
 scheduler = BackgroundScheduler()
@@ -58,6 +61,154 @@ def home():
 @app.route('/dashboard')
 def dashboard():
     return render_template('index.html')
+
+# Trading endpoints
+@app.route('/api/trading/balance')
+def get_trading_balance():
+    """Επιστρέφει το τρέχον υπόλοιπο"""
+    balance = trading_bot.get_balance()
+    return jsonify({
+        "status": "success",
+        "balance": balance
+    })
+
+@app.route('/api/trading/portfolio')
+def get_portfolio():
+    """Επιστρέφει το portfolio"""
+    portfolio = trading_bot.get_portfolio()
+    return jsonify({
+        "status": "success",
+        "portfolio": portfolio
+    })
+
+@app.route('/api/trading/transactions')
+def get_transactions():
+    """Επιστρέφει το ιστορικό συναλλαγών"""
+    transactions = trading_bot.get_transactions()
+    return jsonify({
+        "status": "success",
+        "transactions": transactions
+    })
+
+@app.route('/api/trading/buy', methods=['POST'])
+def buy_coin():
+    """Αγοράζει ένα coin"""
+    try:
+        data = request.json
+        coin = data.get('coin')
+        amount = float(data.get('amount'))
+        
+        # Παίρνουμε τρέχουσα τιμή
+        from database import get_latest_prices
+        prices = get_latest_prices()
+        current_price = None
+        for c, p, _ in prices:
+            if c == coin:
+                current_price = p
+                break
+        
+        if not current_price:
+            return jsonify({
+                "status": "error",
+                "message": "Coin not found"
+            }), 404
+        
+        result = trading_bot.buy_coin(coin, amount, current_price)
+        
+        if result['success']:
+            return jsonify({
+                "status": "success",
+                "message": result['message'],
+                "new_balance": result['new_balance'],
+                "total_cost": result['total_cost']
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": result['message']
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/trading/sell', methods=['POST'])
+def sell_coin():
+    """Πουλάει ένα coin"""
+    try:
+        data = request.json
+        coin = data.get('coin')
+        amount = float(data.get('amount'))
+        
+        # Παίρνουμε τρέχουσα τιμή
+        from database import get_latest_prices
+        prices = get_latest_prices()
+        current_price = None
+        for c, p, _ in prices:
+            if c == coin:
+                current_price = p
+                break
+        
+        if not current_price:
+            return jsonify({
+                "status": "error",
+                "message": "Coin not found"
+            }), 404
+        
+        result = trading_bot.sell_coin(coin, amount, current_price)
+        
+        if result['success']:
+            return jsonify({
+                "status": "success",
+                "message": result['message'],
+                "new_balance": result['new_balance'],
+                "total_value": result['total_value'],
+                "profit_loss": result['profit_loss']
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": result['message']
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/trading/portfolio-value')
+def get_portfolio_value():
+    """Υπολογίζει την αξία του portfolio"""
+    try:
+        # Παίρνουμε τρέχουσες τιμές
+        from database import get_latest_prices
+        prices = get_latest_prices()
+        
+        current_prices = {}
+        for coin_name, price, _ in prices:
+            current_prices[coin_name] = price
+        
+        value_info = trading_bot.get_portfolio_value(current_prices)
+        balance = trading_bot.get_balance()
+        
+        total_net_worth = balance + value_info['total_value']
+        
+        return jsonify({
+            "status": "success",
+            "balance": balance,
+            "portfolio_value": value_info['total_value'],
+            "total_net_worth": total_net_worth,
+            "holdings": value_info['holdings']
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 @app.route('/api/alerts/add', methods=['POST'])
 def add_alert():
