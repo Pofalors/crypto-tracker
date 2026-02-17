@@ -156,7 +156,7 @@ docker rm crypto-tracker
 | GET | `/api/health` | Check API health status |
 | GET | `/dashboard` | Interactive dashboard |
 
-# Alert System
+### Alert System
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -164,7 +164,7 @@ docker rm crypto-tracker
 | POST | `/api/alerts/add` | Create new price alert |
 | DELETE | `/api/alerts/{id}` | Delete specific alert |
 
-# Trading Bot
+### Trading Bot
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -194,13 +194,13 @@ docker rm crypto-tracker
 
 ## 🎯 Key Features Explained
 
-# Technical Indicators
+### Technical Indicators
 
 - SMA (Simple Moving Average): 7-period average showing trend direction
 - EMA (Exponential Moving Average): Weighted average reacting faster to price changes
 - RSI (Relative Strength Index): 0-100 scale indicating overbought (>70) or oversold (<30) conditions
 
-# Trading Bot
+### Trading Bot
 
 - Start with $10,000 virtual USD
 - Buy/sell any supported cryptocurrency
@@ -208,7 +208,7 @@ docker rm crypto-tracker
 - Average buy price tracking
 - Complete transaction history
 
-# Alert System
+### Alert System
 
 - Set price alerts for any coin
 - Choose "above" or "below" conditions
