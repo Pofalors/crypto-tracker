@@ -1,4 +1,4 @@
-# 🚀 Crypto Tracker - Real-Time Cryptocurrency Dashboard
+# 🪙 Crypto Tracker - Real-Time Cryptocurrency Dashboard
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)
